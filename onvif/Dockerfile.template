@@ -1,0 +1,42 @@
+# base-image for node on any machine using a template variable,
+# see more about dockerfile templates here: https://www.balena.io/docs/learn/develop/dockerfile/#dockerfile-templates
+# and about balena base images here: https://www.balena.io/docs/reference/base-images/base-images/
+FROM balenalib/%%BALENA_MACHINE_NAME%%-node:10-stretch-build
+
+# Enable the v4l2 driver for the Raspberry Pi camera
+RUN printf "bcm2835-v4l2\n" >> /etc/modules
+
+# use `install_packages` if you need to install dependencies,
+# for instance if you need git, just uncomment the line below.
+RUN install_packages git python liblivemedia-dev liblog4cpp5-dev cmake libasound2-dev v4l-utils
+
+# Update NPM
+RUN npm install -g npm@latest
+
+# Install gulp
+RUN npm install gulp
+
+# Defines our working directory in container
+WORKDIR /usr/src/app
+
+# Install RPOS
+RUN git clone https://github.com/BreeeZe/rpos.git &&\
+  cd rpos &&\
+  npm install &&\
+  npx gulp
+
+# Setup v4l2rtspserver
+RUN cd rpos &&\
+  git clone https://github.com/mpromonet/v4l2rtspserver &&\
+  cd v4l2rtspserver &&\
+  cmake . && make &&\
+  sudo make install
+
+# This will copy all files in our root to the working  directory in the container
+COPY . ./
+
+# Enable udevd so that plugged dynamic hardware devices show up in our container.
+ENV UDEV=1
+
+# start.sh will run when container starts up on the device
+CMD ["bash", "start.sh"]

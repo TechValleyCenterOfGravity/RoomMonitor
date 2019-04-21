@@ -1,0 +1,11 @@
+version: '2'
+services:
+  onvif:
+    privileged: true
+    build: ./onvif
+    network_mode: host
+    labels:
+      io.balena.features.kernel-modules: '1'
+  sensor:
+    privileged: true
+    build: ./sensor
