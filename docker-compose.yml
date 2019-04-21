@@ -1,7 +1,8 @@
 version: '2'
 services:
   onvif:
+    privileged: true
     build: ./onvif
-    expose:
-      - "8081"
-      - "8554"
+    network_mode: host
+    labels:
+      io.balena.features.kernel-modules: '1'
