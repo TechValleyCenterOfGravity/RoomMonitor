@@ -6,3 +6,6 @@ services:
     network_mode: host
     labels:
       io.balena.features.kernel-modules: '1'
+  sensor:
+    privileged: true
+    build: ./sensor
